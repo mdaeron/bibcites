@@ -9,18 +9,17 @@ Command-line utility which reads a BibTeX file, finds entries with a DOI, looks 
 ## Usage
 
 ````sh
-Usage: bibcites [OPTIONS]
+Usage: bibcites [OPTIONS] BIBFILE
 
-  Reads a BibTeX file, finds entries with a DOI, looks up the corresponding
-  number of citations using OpenCitations (https://opencitations.net), saves
-  this number to the 'addendum' field of each entry, and writes results to a
-  new BibTex file.
+  Reads a BibTeX file (BIBFILE), finds entries with a DOI, looks up the
+  corresponding number of citations using OpenCitations
+  (https://opencitations.net), saves this number to the 'addendum' field of
+  each entry, and writes results to a new BibTex file.
 
   Optionally, using option -s, print out a list of entries with DOI sorted by
   number of citations.
 
 Options:
-  -i TEXT  input BibTex file
   -o TEXT  output BibTex file
   -f TEXT  format of text to save to 'addendum' field
   -s       print list sorted by cites
@@ -30,7 +29,7 @@ Options:
   --help   Show this message and exit.
 ````
 
-`bibcites -i myfile.bib` will read the contents of `myfile.bib`, look up all entries with a `DOI` field in [OpenCitations], append “[X citations]” to the `addendum` field of each entry, and save the result to `myfile_withcites.bib`
+`bibcites myfile.bib` will read the contents of `myfile.bib`, look up all entries with a `DOI` field in [OpenCitations], append “[X citations]” to the `addendum` field of each entry, and save the result to `myfile_withcites.bib`
 
 * To get verbose output, use `-v` option.
 * To set a custom file name for the output BibTeX file, use the `-o <customfilename>` option.

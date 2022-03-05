@@ -7,14 +7,14 @@ __contact__   = 'mathieu@daeron.fr'
 __copyright__ = 'Copyright (c) 2022 Mathieu Daëron'
 __license__   = 'Modified BSD License - https://opensource.org/licenses/BSD-3-Clause'
 __date__	  = '2022-03-05'
-__version__   = '1.0.0'
+__version__   = '1.1.0'
 
 import opencitingpy
 import bibtexparser
 import click
 
 @click.command()
-@click.option('-i', prompt='Input BibTeX file', help='input BibTex file\n')
+@click.argument('bibfile')
 @click.option('-o', default='_', help='output BibTex file\n')
 @click.option('-f',
 	default='[{:s}~citations]',
@@ -23,12 +23,11 @@ import click
 @click.option('-s', default=False, is_flag=True, help='print list sorted by cites\n')
 @click.option('-v', default=False, is_flag=True, help='enable verbose output\n')
 @click.option('-t', default=[], multiple=True, help='only process entries of this type (may be used several times to process several types)\n')
-def cli(i, o, s, f, v, t):
+def cli(bibfile, o, s, f, v, t):
 	'''
-	Reads a BibTeX file, finds entries with a DOI, looks up the corresponding
-	number of citations using OpenCitations (https://opencitations.net), saves
-	this number to the 'addendum' field of each entry, and writes results to a
-	new BibTex file.
+	Reads a BibTeX file (BIBFILE), finds entries with a DOI, looks up the corresponding
+	number of citations using OpenCitations (https://opencitations.net), saves this
+	number to the 'addendum' field of each entry, and writes results to a new BibTex file.
 	
 	Optionally, using option -s, print out a list of entries with DOI sorted
 	by number of citations.
@@ -37,10 +36,10 @@ def cli(i, o, s, f, v, t):
 	t = [_.lower() for _ in t]
 	
 	## read BibTeX file
-	with open(i) as bibtex_file:
+	with open(bibfile) as bibtex_file:
 		db = bibtexparser.load(bibtex_file)
 	if v:
-		print(f'Read {len(db.entries)} entries from {i}.')
+		print(f'Read {len(db.entries)} entries from {bibfile}.')
 
 	## dict of entries with a DOI	
 	dbe = {e['doi']: e for e in db.entries if 'doi' in e and (len(t) == 0 or e['ENTRYTYPE'].lower() in t)}
@@ -87,7 +86,7 @@ def cli(i, o, s, f, v, t):
 				print(f"[{rank+1:>{rlen}}] {dbe[doi]['cites']:>5}   {doi}")
 
 	if o == '_':
-		o = i.split('.bib')[0] + '_withcites.bib'
+		o = bibfile.split('.bib')[0] + '_withcites.bib'
 
 	with open(o, 'w') as bibtex_file:
 		bibtexparser.dump(db, bibtex_file)
