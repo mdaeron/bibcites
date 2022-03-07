@@ -1,7 +1,13 @@
 # Changelog
 
+## v1.2.0
+*Released on 2022-03-07*
+
+### Changes
+* Add `-n` option.
+
 ## v1.1.1
-*Released on 2022-03-06*
+*Released on 2022-03-07*
 
 ### Bug fix
 * Fix [#1](https://github.com/mdaeron/bibcites/issues/1#)
