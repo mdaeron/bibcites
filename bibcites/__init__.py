@@ -11,6 +11,8 @@ __version__   = '1.1.0'
 
 import opencitingpy
 import bibtexparser
+from bibtexparser.bparser import BibTexParser
+
 import click
 
 @click.command()
@@ -37,7 +39,8 @@ def cli(bibfile, o, s, f, v, t):
 	
 	## read BibTeX file
 	with open(bibfile) as bibtex_file:
-		db = bibtexparser.load(bibtex_file)
+		parser = BibTexParser(common_strings = True)
+		db = bibtexparser.load(bibtex_file, parser=parser)
 	if v:
 		print(f'Read {len(db.entries)} entries from {bibfile}.')
 
