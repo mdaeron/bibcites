@@ -6,8 +6,8 @@ __author__	= 'Mathieu Daëron'
 __contact__   = 'mathieu@daeron.fr'
 __copyright__ = 'Copyright (c) 2022 Mathieu Daëron'
 __license__   = 'Modified BSD License - https://opensource.org/licenses/BSD-3-Clause'
-__date__	  = '2022-03-05'
-__version__   = '1.1.0'
+__date__	  = '2022-03-06'
+__version__   = '1.1.1'
 
 import opencitingpy
 import bibtexparser
