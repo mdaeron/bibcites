@@ -8,7 +8,7 @@ Command-line utility which reads a BibTeX file, finds entries with a DOI, looks 
 
 ## Usage
 
-````sh
+````
 Usage: bibcites [OPTIONS] BIBFILE
 
   Reads a BibTeX file (BIBFILE), finds entries with a DOI, looks up the
