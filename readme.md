@@ -20,13 +20,14 @@ Usage: bibcites [OPTIONS] BIBFILE
   number of citations.
 
 Options:
-  -o TEXT  output BibTex file
-  -f TEXT  format of text to save to 'addendum' field
-  -s       print list sorted by cites
-  -v       enable verbose output
-  -t TEXT  only process entries of this type (may be used several times to
-           process several types)
-  --help   Show this message and exit.
+  -o TEXT     output BibTex file
+  -f TEXT     format of text to save to 'addendum' field
+  -s          print list sorted by cites
+  -v          enable verbose output
+  -t TEXT     only process entries of this type (may be used several times to
+              process several types)
+  -n INTEGER  size limit for OpenCitations queries
+  --help      Show this message and exit.
 ````
 
 `bibcites myfile.bib` will read the contents of `myfile.bib`, look up all entries with a `DOI` field in [OpenCitations], append “[X citations]” to the `addendum` field of each entry, and save the result to `myfile_withcites.bib`
@@ -36,6 +37,8 @@ Options:
 * To set a custom format to the `addendum` field, use the `-f` option, e.g., `-f 'Cited {:s} times'`. Use the `{:s}` specifier because the citation count is a string.
 * To print out a list of processed entries, sorted by decreasing number of citations, use the `-s` option.
 * To process only entries of certain types, use the `-t` option one or more times, e.g., `-t article -t book`.
+* To limit the size of OpenCitations queries, use `-n` option (default is `-n 50`).
+
 
 ## Contact
 
