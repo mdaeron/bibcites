@@ -4,7 +4,7 @@ Command-line utility which reads a BibTeX file, finds entries with a DOI, looks 
 
 ## Installation
 
-`python -m pip install bibcites` should do the trick
+`python -m pip install bibcites` should do the trick.
 
 ## Usage
 
