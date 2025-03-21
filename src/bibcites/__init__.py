@@ -4,32 +4,30 @@ CLI to insert number of citations into BibTeX entries, using OpenCitations
 
 __author__	= 'Mathieu Daëron'
 __contact__   = 'mathieu@daeron.fr'
-__copyright__ = 'Copyright (c) 2022 Mathieu Daëron'
-__license__   = 'Modified BSD License - https://opensource.org/licenses/BSD-3-Clause'
-__date__	  = '2022-03-07'
-__version__   = '1.2.0'
+__copyright__ = 'Copyright (c) 2025 Mathieu Daëron'
+__license__   = 'MIT License - https://opensource.org/licenses/MIT'
+__date__	  = '2025-03-21'
+__version__   = '2.0.1'
 
-import opencitingpy
 import bibtexparser
 from bibtexparser.bparser import BibTexParser
-from requests.exceptions import JSONDecodeError
+from requests import get
 import click
-
-class OCQueryTooBig(Exception):
-	pass
+from tqdm import tqdm
 
 @click.command()
 @click.argument('bibfile')
 @click.option('-o', default='_', help='output BibTex file')
 @click.option('-f',
-	default='[{:s}~citations]',
-	help='format of text to save to \'addendum\' field',
+	default = '[citations: {:s}]',
+	help = "format of text to save to 'addendum' field",
 	)
 @click.option('-s', default=False, is_flag=True, help='print list sorted by cites')
 @click.option('-v', default=False, is_flag=True, help='enable verbose output')
 @click.option('-t', default=[], multiple=True, help='only process entries of this type (may be used several times to process several types)')
-@click.option('-n', default=50, help='size limit for OpenCitations queries')
-def cli(bibfile, o, s, f, v, t, n):
+@click.option('-p', default='', multiple=False, help='prepend custom string to each bibtex key')
+# @click.option('-k', default='', multiple=False, help='API token for OpenCitations')
+def cli(bibfile, o, s, f, v, t, p):
 	'''
 	Reads a BibTeX file (BIBFILE), finds entries with a DOI, looks up the corresponding
 	number of citations using OpenCitations (https://opencitations.net), saves this
@@ -37,7 +35,11 @@ def cli(bibfile, o, s, f, v, t, n):
 	
 	Optionally, using option -s, print out a list of entries with DOI sorted
 	by number of citations.
+	Optionally, using option -k, prepend each entry key with a custom string.
 	'''
+
+# 	Interrogating OpenCitations requires an API token which may be specified using option -k.
+# 	Without this option, bibcites will use the contents of `./.opencitations-token`
 	
 	t = [_.lower() for _ in t]
 	
@@ -48,8 +50,16 @@ def cli(bibfile, o, s, f, v, t, n):
 	if v:
 		print(f'Read {len(db.entries)} entries from {bibfile}.')
 
+	if p:
+		for r in db.entries:
+			r['ID'] = p + r['ID']
+
 	## dict of entries with a DOI	
 	dbe = {e['doi']: e for e in db.entries if 'doi' in e and (len(t) == 0 or e['ENTRYTYPE'].lower() in t)}
+
+# 	if k == '':
+# 		with open('./.opencitations-token') as fid:
+# 			k = strip(fid.read())
 
 	if v:
 		if t:
@@ -66,35 +76,48 @@ def cli(bibfile, o, s, f, v, t, n):
 			print(f'Found {len(dbe)} entries with a DOI.')
 	
 	dois = [doi for doi in dbe]
-	doi_chunks = [dois[i:i + n] for i in range(0, len(dois), n)]
 
-	try:
-		metadata = []
-		for k, chunk in enumerate(doi_chunks):
-			if v:
-				if len(doi_chunks) > 1:
-					print(f'Querying OpenCitations ({k+1}/{len(doi_chunks)})...')
-				else:
-					print('Querying OpenCitations...')
-			metadata += opencitingpy.client.Client().get_metadata(chunk)
-	except JSONDecodeError:
-		raise OCQueryTooBig(f'OpenCitations query is too long. Try again using smaller chunks (-n option smaller than {n}).')
+# 	print('Querying OpenCitations...')
+	metadata = []
+	for _, doi in tqdm(
+		list(enumerate(dois)),
+		desc = 'Querying OpenCitations',
+		bar_format = '{desc}: |{bar}{r_bar}',
+		):
+		r = get(		
+			f'https://opencitations.net/index/api/v1/citation-count/{doi}?format=csv',
+# 			dict(authorization = api_token),
+			)
+		metadata.append((doi, r.text))
+# 		print([r.text])
 
 	if v:
 		print(f'Read {len(metadata)} records from OpenCitations.')
 
-	for k in metadata:
+	for doi, c in metadata:
+
+		try:
+			c = c.split('\n')[1].strip()
+		except:
+			if v:
+				print(f'Could not read citation count for {doi}')
+			continue
+
 		for j in dbe:
-			if j.upper() == k.doi.upper():
-				dbe[j]['cites'] = k.citation_count
+			if j.upper() == doi.upper():
+				dbe[j]['cites'] = str(c) if len(c) else '0'
 				if v:
-					print(f'Found {k.citation_count} citations for {j}.')
-				if int(k.citation_count):
+					print(f'Found {c} citations for {j}.')
+				if int(dbe[j]['cites']):
 					if 'addendum' in dbe[j]:
-						dbe[j]['addendum'] = dbe[j]['addendum'] + '. ' + f.format(k.citation_count)
+						dbe[j]['addendum'] = dbe[j]['addendum'] + '. ' + f.format(dbe[j]['cites'])
 					else:
-						dbe[j]['addendum'] = f.format(k.citation_count)
+						dbe[j]['addendum'] = f.format(dbe[j]['cites'])
 				break
+
+# 		for j in dbe:
+# 			if 'cites' not in dbe[j]:
+# 				print(dbe[j])
 
 	if s:
 		rlen = len(str(len(dbe)))
